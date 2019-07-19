@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SceneController : MonoBehaviour
 {
+    private int score;
     public int gridRow = 2;
     public int gridColumn = 4;
     public float offsetX = 2.0f;
@@ -11,8 +12,9 @@ public class SceneController : MonoBehaviour
 
     [SerializeField] private MemoryCard originalCard;
     [SerializeField] private Sprite[] images;
+    [SerializeField] private TextMesh scoreLabel;
 
-   
+
 
     void Start()
     {
@@ -63,4 +65,50 @@ public class SceneController : MonoBehaviour
 
         return newArray;
     }
+
+    private MemoryCard _firstRevealad;
+    private MemoryCard _secondRevealad;
+
+    public bool canReveal
+    {
+        get { return _secondRevealad == null; }
+    }
+
+    public void CardRevealed(MemoryCard card)
+    {
+        if (_firstRevealad == null)
+        {
+            _firstRevealad = card;
+        }
+        else
+        {
+            _secondRevealad = card;
+            StartCoroutine(CheckMatch());
+        }
+    }
+
+    private IEnumerator CheckMatch()
+    {
+        if (_firstRevealad.id == _secondRevealad.id)
+        {
+            score++;
+            scoreLabel.text = "Score: " + score;
+
+        }
+        else
+        {
+            yield return new WaitForSeconds(.5f);
+            _firstRevealad.Unreveal();
+            _secondRevealad.Unreveal();
+        }
+        _firstRevealad = null;
+        _secondRevealad = null;
+    }
+
+    public void Restart()
+    {
+        
+        Application.LoadLevel("Scene");
+    }
+   
 }
